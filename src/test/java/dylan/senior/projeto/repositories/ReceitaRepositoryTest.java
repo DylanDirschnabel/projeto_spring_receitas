@@ -38,6 +38,8 @@ class ReceitaRepositoryTest {
     public void teste1() {
         ListagemSemTagsDTO r1 = new ListagemSemTagsDTO(1l, "teste", 5d, LocalDateTime.now(), "criador");
         ListagemSemTagsDTO r2 = new ListagemSemTagsDTO(2l, "testee", 5d, LocalDateTime.now(), "criador");
+        lista.add(r1);
+        lista.add(r2);
 
         when(receitaRepository.buscaPorNome("teste")).thenReturn(lista);
 

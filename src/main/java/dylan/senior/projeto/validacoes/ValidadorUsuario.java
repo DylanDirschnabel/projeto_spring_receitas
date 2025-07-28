@@ -13,6 +13,9 @@ public class ValidadorUsuario {
     private UsuarioRepository usuarioRepository;
 
     public void validar(CadastroUsuarioDTO dados) {
+        if(dados == null) {
+            throw new ValidacaoException("Dados inválidos para cadastro de usuário");
+        }
         validarLogin(dados.login());
         validarSenha(dados.senha());
     }

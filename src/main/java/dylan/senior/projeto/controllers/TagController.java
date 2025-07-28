@@ -50,14 +50,14 @@ public class TagController {
     @GetMapping("/{id}")
     @Transactional
     public ResponseEntity<ListagemTagDTO> detalhar(@PathVariable Long id) {
-        var tag = tagRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada de nome" + id + "."));
+        var tag = tagRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada de id " + id + "."));
         return ResponseEntity.ok(new ListagemTagDTO(tag));
     }
 
     @GetMapping("/buscaPorNome")
     @Transactional
     public ResponseEntity<ListagemTagDTO> detalharPorNome(@RequestBody @Valid CadastroTagDTO dados) {
-        var tag = tagRepository.findByNome(dados.nome()).orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada com nome " + dados.nome() + "."));
+        var tag = tagRepository.findByNome(dados.nome()).orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada de nome '" + dados.nome() + "'."));
         return ResponseEntity.ok(new ListagemTagDTO(tag));
     }
 

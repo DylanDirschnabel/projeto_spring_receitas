@@ -12,6 +12,10 @@ public class ValidadorTag {
     private TagRepository tagRepository;
 
     public void validar(String nome) {
+        if(nome == null || nome.isBlank()) {
+            throw new ValidacaoException("Erro: nome de tag inválido");
+        }
+
         if(tagRepository.existsByNome(nome)) {
             throw new ValidacaoException("Erro: tag com esse nome já existe");
         }

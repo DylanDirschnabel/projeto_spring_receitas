@@ -52,6 +52,13 @@ public class UsuarioController {
         return ResponseEntity.ok(page);
     }
 
+    @GetMapping("/{id}")
+    @Transactional
+    public ResponseEntity<DetalhamentoUsuarioDTO> detalhar(@PathVariable Long id) {
+        var usuario = usuarioRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário não encontrado de id " + id + "."));
+        return ResponseEntity.ok(new DetalhamentoUsuarioDTO(usuario));
+    }
+
     @PutMapping("/{id}")
     @Transactional
     public ResponseEntity<DetalhamentoUsuarioDTO> alterar(@RequestBody AlteracaoUsuarioDTO dados, @PathVariable Long id) {

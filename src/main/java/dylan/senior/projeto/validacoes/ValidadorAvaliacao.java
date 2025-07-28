@@ -13,11 +13,15 @@ public class ValidadorAvaliacao {
     private AvaliacaoRepository avaliacaoRepository;
 
     public void validar(CadastroAvaliacaoDTO dados) {
+        if(dados == null) {
+            throw new ValidacaoException("Erro: dados inválidos para cadastro de avaliação");
+        }
+
         validarSeJaExiste(dados.id_receita(), dados.id_usuario());
         validarNota(dados.nota());
     }
 
-    public void validarSeJaExiste(Long idReceita, Long idUsuario) {
+    public void validarSeJaExiste(long idReceita, long idUsuario) {
         if(avaliacaoRepository.existsByIdReceitaIdUsuario(idReceita, idUsuario)) {
             throw new ValidacaoException("Erro: usuário já avaliou essa receita");
         }

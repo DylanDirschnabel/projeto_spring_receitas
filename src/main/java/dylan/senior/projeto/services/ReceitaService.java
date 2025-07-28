@@ -27,6 +27,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 
 @Service
@@ -59,11 +60,14 @@ public class ReceitaService {
 
     @Transactional
     public void adicionarTag(Receita receita, String tag) {
+        if(receita == null || tag == null || tag.isBlank()) {
+            throw new ValidacaoException("Dados inválidos para adição de tag na receita");
+        }
+
         if(tagRepository.existsByNome(tag)) {
 
-            var t = tagRepository.findByNome(tag)
-                    .orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada de nome " + tag + "."));
-            receita.getTags().add((Tag) t);
+            var t = tagRepository.findByNome(tag);
+            receita.getTags().add((t.get()));
 
         } else {
 
@@ -77,18 +81,29 @@ public class ReceitaService {
 
     @Transactional
     public void removerTag(Receita receita, String tag) {
+        if(receita == null || tag == null) {
+            throw new ValidacaoException("Dados inválidos para remoção de tag da receita");
+        }
+
         var t = tagRepository.findByNome(tag)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada com nome " + tag + "."));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada com nome '" + tag + "'."));
         receita.getTags().remove(t);
     }
 
     @Transactional
     public void adicionarIngrediente(Receita receita, String ingrediente) {
+        if(receita == null || ingrediente == null) {
+            throw new ValidacaoException("Dados inválidos para adição de ingrediente da receita");
+        }
         receita.getIngredientes().add(ingrediente);
     }
 
     @Transactional
     public void removerIngrediente(Receita receita, String ingrediente) {
+        if(receita == null || ingrediente == null) {
+            throw new ValidacaoException("Dados inválidos para remoção de ingrediente da receita");
+        }
+
         if(!receita.getIngredientes().contains(ingrediente)) {
             throw new ValidacaoException("Receita não contém o ingrediente '" + ingrediente + "'.");
         }
@@ -125,8 +140,13 @@ public class ReceitaService {
 
     @Transactional
     public Receita alterar(Long id, AlteracaoReceitaDTO dados) {
+
         Receita receita = receitaRepository.findById(id)
-                .orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id" + id + "."));
+                .orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
+
+        if(dados == null) {
+            return receita;
+        }
 
         if(dados.nome() != null && !dados.nome().isBlank()) {
             receita.setNome(dados.nome());
@@ -141,6 +161,10 @@ public class ReceitaService {
 
     @Transactional
     public List<ListagemBuscaReceitaDTO> buscaInclusiva(BuscaReceitaDTO dados) {
+        if(dados == null) {
+            return new ArrayList<>();
+        }
+
         return receitaRepository.buscaInclusivaTags(
                 dados.inclusas().stream().map(String::toLowerCase).toList(),
                 dados.exclusas().stream().map(String::toLowerCase).toList())
@@ -149,6 +173,10 @@ public class ReceitaService {
 
     @Transactional
     public List<ListagemBuscaReceitaDTO> buscaExclusiva(BuscaReceitaDTO dados) {
+        if(dados == null) {
+            return new ArrayList<>();
+        }
+
         return receitaRepository.buscaExclusivaTags(dados.inclusas().stream().map(String::toLowerCase).toList(),
                                                     dados.exclusas().stream().map(String::toLowerCase).toList(),
                                                     dados.inclusas().size())
@@ -157,6 +185,9 @@ public class ReceitaService {
 
     @Transactional
     public List<ListagemBuscaReceitaDTO> buscaPorNome(String nome) {
+        if(nome == null) {
+            nome = "";
+        }
 
         return receitaRepository.buscaPorNome(nome).stream().map(x -> new ListagemBuscaReceitaDTO(
                 x, receitaRepository.findTagsById(x.id())
@@ -223,8 +254,10 @@ public class ReceitaService {
                 " Para que você faça isso, use o id do usuário '" + dados.id_usuario() + "'." +
                 " Além disso, crie a receita usando como base o nome '"+ dados.nome() +"'," +
                 " com as tags '" + tags + "' e com esse comentário adicional de instrução '"+ dados.comentario() +"'." +
-                " O nome e tags desejados, além do comentário, podem não ser informadas. Caso não sejam, faça a receita como preferir." +
-                " Sinta-se livre para adicionar mais tags como preferir, e adicione tags que facilitem a busca da receita, como os principais ingredientes ou algum eletrodoméstico necessário." +
+                " O nome e tags desejados, além do comentário, podem não ser informados. Caso não sejam, faça a receita como preferir." +
+                " Sinta-se livre para adicionar mais tags como preferir, e adicione tags que facilitem a busca da receita," +
+                " como os principais ingredientes ou algum eletrodoméstico necessário," +
+                " e adicione tags de ingredientes que são comuns alergias, como lactose, nozes e alho." +
                 " SEMPRE adicione a tag 'IA'",
                 OpenAiChatOptions.builder().
                         responseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, this.jsonSchema)).build()
