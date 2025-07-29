@@ -17,6 +17,7 @@ import dylan.senior.projeto.services.ReceitaService;
 import jakarta.persistence.EntityNotFoundException;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
+import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -58,7 +59,7 @@ public class ReceitaController {
     @GetMapping("/{id}")
     @Transactional
     public ResponseEntity<DetalhamentoReceitaDTO> detalhar(@PathVariable Long id) {
-        var receita = receitaRepository.findById(id).orElseThrow(() -> new EntityNotFoundException("Receita não encontrada"));
+        var receita = receitaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
         return ResponseEntity.ok(receitaService.detalhar(receita));
     }
 
@@ -133,6 +134,12 @@ public class ReceitaController {
         return ResponseEntity.ok(receitaService.buscaInclusiva(dados));
     }
 
+    @GetMapping("/recomendacao/{id}")
+    @Transactional
+    public ResponseEntity<List<ListagemBuscaReceitaDTO>> buscaRecomendada(@PathVariable @NotNull Long id) {
+        return ResponseEntity.ok(receitaService.buscaPorRecomendacao(id));
+    }
+
     // -------- Gerar Receita com IA
 
     @PostMapping("/ia")
@@ -146,6 +153,7 @@ public class ReceitaController {
 
         return ResponseEntity.created(uri).body(new ListagemReceitaDTO(receita));
     }
+
 
 
 }

@@ -70,4 +70,5 @@ public class ListaService {
         return listaRepository.listarPorUsuario(id).stream().map(ListagemListaDTO::new).toList();
     }
 
+
 }

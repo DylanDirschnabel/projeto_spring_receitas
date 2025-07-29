@@ -45,7 +45,7 @@ public class AvaliacaoController {
     @GetMapping("/{id}")
     @Transactional
     public ResponseEntity<DetalhamentoAvaliacaoDTO> detalhar(@PathVariable Long id) {
-        var avaliacao = avaliacaoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Avaliação não encontrada com id " + id + "."));
+        var avaliacao = avaliacaoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Avaliação não encontrada de id " + id + "."));
         return ResponseEntity.ok(new DetalhamentoAvaliacaoDTO(avaliacao));
     }
 
@@ -66,7 +66,7 @@ public class AvaliacaoController {
 
     @DeleteMapping("/{id}")
     @Transactional
-    public ResponseEntity<String> delete(@PathVariable Long id) {
+    public ResponseEntity<String> deletar(@PathVariable Long id) {
         var avaliacao = avaliacaoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Avaliação não encontrada de id " + id + "."));
         avaliacaoRepository.delete(avaliacao);
         return ResponseEntity.ok("Avaliação deletada com sucesso!");

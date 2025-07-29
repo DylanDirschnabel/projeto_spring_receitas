@@ -5,10 +5,12 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import dylan.senior.projeto.dtos.busca.BuscaReceitaDTO;
 import dylan.senior.projeto.dtos.alteracao.AlteracaoReceitaDTO;
 import dylan.senior.projeto.dtos.busca.ListagemBuscaReceitaDTO;
+import dylan.senior.projeto.dtos.busca.ListagemSemTagsDTO;
 import dylan.senior.projeto.dtos.cadastro.CadastroGeradoReceitaDTO;
 import dylan.senior.projeto.dtos.cadastro.CadastroReceitaDTO;
 import dylan.senior.projeto.dtos.detalhamento.DetalhamentoReceitaDTO;
 import dylan.senior.projeto.dtos.listagem.ListagemAvaliacaoDTO;
+import dylan.senior.projeto.dtos.listagem.ListagemListaDTO;
 import dylan.senior.projeto.entities.Receita;
 import dylan.senior.projeto.entities.Tag;
 import dylan.senior.projeto.entities.Usuario;
@@ -195,6 +197,33 @@ public class ReceitaService {
 
     }
 
+    @Transactional
+    public List<ListagemBuscaReceitaDTO> buscaPorRecomendacao(Long id) {
+        if(!usuarioRepository.existsById(id)) {
+            throw new EntidadeNaoEncontradaException("Usuário não encontrado de id " + id + ".");
+        }
+
+        List<Object[]> resultado = receitaRepository.recomendarReceitas(id);
+        if(resultado.isEmpty()) {
+            return this.buscaPorNome(null);
+        }
+
+        List<ListagemSemTagsDTO> listagem = resultado.stream().map(r -> new ListagemSemTagsDTO(
+                (Long) r[0],
+                (String) r[1],
+                (Double) r[2],
+                (LocalDateTime) r[3],
+                (String) r[4]
+                )
+        ).toList();
+
+        return listagem.stream().map(r -> new ListagemBuscaReceitaDTO(
+                r,
+                receitaRepository.findTagsById(r.id()))
+        ).toList();
+    }
+
+
     String jsonSchema = """
             
             
@@ -257,7 +286,7 @@ public class ReceitaService {
                 " O nome e tags desejados, além do comentário, podem não ser informados. Caso não sejam, faça a receita como preferir." +
                 " Sinta-se livre para adicionar mais tags como preferir, e adicione tags que facilitem a busca da receita," +
                 " como os principais ingredientes ou algum eletrodoméstico necessário," +
-                " e adicione tags de ingredientes que são comuns alergias, como lactose, nozes e alho." +
+                " e adicione tags de ingredientes que são comuns alergias, como lactose, nozes e alho. Também adicione como tag os ingredientes que sejam NECESSÁRIOS para a receita. " +
                 " SEMPRE adicione a tag 'IA'",
                 OpenAiChatOptions.builder().
                         responseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, this.jsonSchema)).build()
