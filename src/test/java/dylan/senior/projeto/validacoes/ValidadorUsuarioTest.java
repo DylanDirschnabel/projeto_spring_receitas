@@ -1,6 +1,7 @@
 package dylan.senior.projeto.validacoes;
 
 import dylan.senior.projeto.dtos.cadastro.CadastroUsuarioDTO;
+import dylan.senior.projeto.entities.Usuario;
 import dylan.senior.projeto.infra.exceptions.exception.ValidacaoException;
 import dylan.senior.projeto.repositories.UsuarioRepository;
 import org.junit.jupiter.api.BeforeEach;
@@ -9,7 +10,11 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
+import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContext;
+import org.springframework.security.core.context.SecurityContextHolder;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.Mockito.verify;
@@ -105,4 +110,43 @@ class ValidadorUsuarioTest {
     public void teste12() {
         assertEquals("Erro: senha deve conter pelo menos algum desses caracteres: [!, @, #, $, %, &, ?]", assertThrows(ValidacaoException.class, () -> validadorUsuario.validarSenha("senhaaaaaa1A")).getMessage());
     }
+
+    // ---- Testes 'validarAutenticacao' ---- //
+
+    @Test
+    @DisplayName("Teste 'validarAutenticacao': usuário válido")
+    public void teste13() {
+
+        Usuario usuarioMock = new Usuario();
+        usuarioMock.setId(1L);
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getPrincipal()).thenReturn(usuarioMock);
+
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        SecurityContextHolder.setContext(securityContext);
+
+        assertDoesNotThrow(() -> validadorUsuario.validarAutenticacao(1L));
+
+    }
+    @Test
+    @DisplayName("Teste 'validarAutenticacao': usuário inválido")
+    public void teste14() {
+
+        Usuario usuarioMock = new Usuario();
+        usuarioMock.setId(1L);
+
+        Authentication authentication = Mockito.mock(Authentication.class);
+        Mockito.when(authentication.getPrincipal()).thenReturn(usuarioMock);
+
+        SecurityContext securityContext = Mockito.mock(SecurityContext.class);
+        Mockito.when(securityContext.getAuthentication()).thenReturn(authentication);
+
+        SecurityContextHolder.setContext(securityContext);
+
+        assertEquals("Erro: usuário inválido", assertThrows(ValidacaoException.class, () -> validadorUsuario.validarAutenticacao(2L)).getMessage());
+    }
+
 }

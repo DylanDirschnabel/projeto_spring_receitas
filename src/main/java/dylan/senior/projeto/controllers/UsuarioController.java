@@ -32,19 +32,7 @@ public class UsuarioController {
     @Autowired
     private ValidadorUsuario validadorUsuario;
 
-    @PostMapping
-    @Transactional
-    public ResponseEntity<DetalhamentoUsuarioDTO> cadastrar(@RequestBody @Valid CadastroUsuarioDTO dados, UriComponentsBuilder uriBuilder) {
-        validadorUsuario.validar(dados);
-
-        var usuario = new Usuario(dados);
-        usuarioRepository.save(usuario);
-
-        var uri = uriBuilder.path("/receitas/{id}").buildAndExpand(usuario.getId()).toUri();
-
-        return ResponseEntity.created(uri).body(new DetalhamentoUsuarioDTO(usuario));
-    }
-
+    
     @GetMapping
     @Transactional
     public ResponseEntity<Page<ListagemUsuarioDTO>> listar(@PageableDefault(size = 10, sort={"nome"}) Pageable paginacao) {
@@ -55,6 +43,9 @@ public class UsuarioController {
     @GetMapping("/{id}")
     @Transactional
     public ResponseEntity<DetalhamentoUsuarioDTO> detalhar(@PathVariable Long id) {
+
+        validadorUsuario.validarAutenticacao(id);
+
         var usuario = usuarioRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário não encontrado de id " + id + "."));
         return ResponseEntity.ok(new DetalhamentoUsuarioDTO(usuario));
     }
@@ -69,6 +60,9 @@ public class UsuarioController {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<String> deletar(@PathVariable Long id) {
+
+        validadorUsuario.validarAutenticacao(id);
+
         var usuario = usuarioRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Usuario não encontrado de id " + id + "."));
         usuarioRepository.delete(usuario);
         return ResponseEntity.ok("Usuário deletado com sucesso!");

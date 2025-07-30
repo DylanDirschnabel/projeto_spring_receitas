@@ -1,24 +1,20 @@
 package dylan.senior.projeto.controllers;
 
 import com.fasterxml.jackson.core.JsonProcessingException;
-import dylan.senior.projeto.dtos.alteracao.AlteracaoListaDTO;
 import dylan.senior.projeto.dtos.alteracao.AlteracaoReceitaDTO;
 import dylan.senior.projeto.dtos.busca.BuscaPorNomeDTO;
 import dylan.senior.projeto.dtos.busca.BuscaReceitaDTO;
 import dylan.senior.projeto.dtos.busca.ListagemBuscaReceitaDTO;
 import dylan.senior.projeto.dtos.cadastro.CadastroGeradoReceitaDTO;
-import dylan.senior.projeto.dtos.cadastro.CadastroListaDTO;
 import dylan.senior.projeto.dtos.cadastro.CadastroReceitaDTO;
-import dylan.senior.projeto.dtos.detalhamento.DetalhamentoListaDTO;
 import dylan.senior.projeto.dtos.detalhamento.DetalhamentoReceitaDTO;
-import dylan.senior.projeto.dtos.listagem.ListagemListaDTO;
 import dylan.senior.projeto.dtos.listagem.ListagemReceitaDTO;
-import dylan.senior.projeto.entities.Lista;
 import dylan.senior.projeto.entities.Receita;
 import dylan.senior.projeto.entities.Usuario;
 import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaException;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.services.ReceitaService;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,7 +37,6 @@ import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -56,6 +51,9 @@ class ReceitaControllerTest {
 
     @Mock
     private ReceitaRepository receitaRepository;
+
+    @Mock
+    private ValidadorUsuario validadorUsuario;
 
     private Receita receita;
 
@@ -448,6 +446,36 @@ class ReceitaControllerTest {
         verify(receitaService).criarReceita(dados);
         verify(receitaRepository).save(any(Receita.class));
 
+    }
+
+    // ---- Testes 'buscaRecomendada' ---- //
+
+    @Test
+    @DisplayName("Teste 'buscaRecomendada'")
+    public void teste16() {
+
+        when(receitaService.buscaPorRecomendacao(1L)).thenReturn(List.of(new ListagemBuscaReceitaDTO(1L, "nome", new ArrayList<>(), 5d, LocalDateTime.now(), "criador")));
+
+        ResponseEntity<List<ListagemBuscaReceitaDTO>> response = receitaController.buscaRecomendada(1L);
+
+        assertAll("testes",
+                () -> assertEquals("200 OK", response.getStatusCode().toString()),
+                () -> assertNotNull(response.getBody()),
+                () -> {
+                    assertNotNull(response.getBody());
+                    assertEquals(1, response.getBody().size());
+                },
+                () -> {
+                    assertNotNull(response.getBody());
+                    assertEquals("nome", response.getBody().get(0).nome());
+                },
+                () -> {
+                    assertNotNull(response.getBody());
+                    assertEquals(5, response.getBody().get(0).media());
+                }
+        );
+
+        verify(receitaService).buscaPorRecomendacao(1L);
     }
 
 }

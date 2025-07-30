@@ -10,7 +10,6 @@ import dylan.senior.projeto.dtos.cadastro.CadastroGeradoReceitaDTO;
 import dylan.senior.projeto.dtos.cadastro.CadastroReceitaDTO;
 import dylan.senior.projeto.dtos.detalhamento.DetalhamentoReceitaDTO;
 import dylan.senior.projeto.dtos.listagem.ListagemAvaliacaoDTO;
-import dylan.senior.projeto.dtos.listagem.ListagemListaDTO;
 import dylan.senior.projeto.entities.Receita;
 import dylan.senior.projeto.entities.Tag;
 import dylan.senior.projeto.entities.Usuario;
@@ -19,6 +18,7 @@ import dylan.senior.projeto.infra.exceptions.exception.ValidacaoException;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.repositories.TagRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.ai.chat.model.ChatResponse;
 import org.springframework.ai.chat.prompt.Prompt;
@@ -46,6 +46,9 @@ public class ReceitaService {
 
     @Autowired
     private OpenAiChatModel chatModel;
+
+    @Autowired
+    private ValidadorUsuario validadorUsuario;
 
     @Transactional
     public Receita criarReceita(CadastroReceitaDTO dados) {
@@ -146,6 +149,8 @@ public class ReceitaService {
         Receita receita = receitaRepository.findById(id)
                 .orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
 
+        validadorUsuario.validarAutenticacao(receita.getCriador().getId());
+
         if(dados == null) {
             return receita;
         }
@@ -156,6 +161,7 @@ public class ReceitaService {
         if(dados.corpo() != null && !dados.corpo().isBlank()) {
             receita.setCorpo(dados.corpo());
         }
+
 
         return receita;
     }
@@ -287,7 +293,7 @@ public class ReceitaService {
                 " Sinta-se livre para adicionar mais tags como preferir, e adicione tags que facilitem a busca da receita," +
                 " como os principais ingredientes ou algum eletrodoméstico necessário," +
                 " e adicione tags de ingredientes que são comuns alergias, como lactose, nozes e alho. Também adicione como tag os ingredientes que sejam NECESSÁRIOS para a receita. " +
-                " SEMPRE adicione a tag 'IA'",
+                " SEMPRE adicione a tag 'IA' e NUNCA coloque a tag 'Necessário'. Faça a receita com base no idioma solicitado no comentário. Como padrão, use o português. ",
                 OpenAiChatOptions.builder().
                         responseFormat(new ResponseFormat(ResponseFormat.Type.JSON_SCHEMA, this.jsonSchema)).build()
 

@@ -17,6 +17,7 @@ import dylan.senior.projeto.infra.exceptions.exception.ValidacaoException;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.repositories.TagRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -54,6 +55,9 @@ class ReceitaServiceTest {
 
     @Mock(answer = Answers.RETURNS_DEEP_STUBS)
     private OpenAiChatModel chatModel;
+
+    @Mock
+    private ValidadorUsuario validadorUsuario;
 
     private Avaliacao avaliacao;
 
@@ -545,13 +549,56 @@ class ReceitaServiceTest {
 
     }
 
+    // ---- Testes 'buscaPorRecomendacao' ---- //
 
+    @Test
+    @DisplayName("Teste 'buscaPorRecomendacao': usuário válido")
+    public void test34() {
 
+        Object[] resultado = {1L, "nome", 4D, LocalDateTime.now(), "criador"};
+        List<Object[]> listaResultado = new ArrayList<>();
+        listaResultado.add(resultado);
 
+        when(usuarioRepository.existsById(1L)).thenReturn(true);
+        when(receitaRepository.recomendarReceitas(1L)).thenReturn(listaResultado);
 
+        List<ListagemBuscaReceitaDTO> resultadoFinal = receitaService.buscaPorRecomendacao(1L);
 
+        assertAll("testes",
+                () -> assertEquals(1, resultadoFinal.size()),
+                () -> assertEquals("nome", resultadoFinal.get(0).nome()),
+                () -> assertEquals(4, resultadoFinal.get(0).media())
+        );
+    }
+    @Test
+    @DisplayName("Teste 'buscaPorRecomendacao': usuário não encontrado")
+    public void test35() {
 
+        when(usuarioRepository.existsById(1L)).thenReturn(false);
 
+        assertEquals("Usuário não encontrado de id 1.", assertThrows(EntidadeNaoEncontradaException.class, () -> receitaService.buscaPorRecomendacao(1L)).getMessage());
 
+    }
+    @Test
+    @DisplayName("Teste 'buscaPorRecomendacao': sem recomendação")
+    public void teste36() {
 
+        List<Object[]> listaResultado = new ArrayList<>();
+
+        List<Receita> receitas = List.of(receita);
+        List<String> tags = List.of("doce", "chocolate");
+
+        when(usuarioRepository.existsById(1L)).thenReturn(true);
+        when(receitaRepository.recomendarReceitas(1L)).thenReturn(listaResultado);
+        when(receitaRepository.buscaPorNome("")).thenReturn(List.of(new ListagemSemTagsDTO(1L, "nome", 4d, LocalDateTime.now(), "Maria")));
+        when(receitaRepository.findTagsById(1L)).thenReturn(tags);
+
+        List<ListagemBuscaReceitaDTO> resultadoFinal = receitaService.buscaPorRecomendacao(1L);
+
+        assertAll("testes",
+                () -> assertEquals(1, resultadoFinal.size()),
+                () -> assertEquals("nome", resultadoFinal.get(0).nome()),
+                () -> assertEquals(4, resultadoFinal.get(0).media())
+        );
+    }
 }

@@ -10,6 +10,7 @@ import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaExce
 import dylan.senior.projeto.repositories.ListaRepository;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import jakarta.validation.constraints.NotNull;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class ListaService {
     @Autowired
     private ReceitaRepository receitaRepository;
 
+    @Autowired
+    private ValidadorUsuario validadorUsuario;
+
     @Transactional
     public Lista criarLista(CadastroListaDTO dados) {
         Usuario usuario = usuarioRepository.findById(dados.id_usuario()).orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário não encontrado de id " + dados.id_usuario() + "."));
@@ -37,8 +41,12 @@ public class ListaService {
 
     @Transactional
     public Lista adicionarReceita(Long id_receita, Long id_lista) {
-        Receita receita = receitaRepository.findById(id_receita).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id_receita + "."));
+
         Lista lista = listaRepository.findById(id_lista).orElseThrow(() -> new EntidadeNaoEncontradaException("Lista não encontrada de id " + id_lista + "."));
+
+        validadorUsuario.validarAutenticacao(lista.getUsuario().getId());
+
+        Receita receita = receitaRepository.findById(id_receita).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id_receita + "."));
 
         lista.getReceitas().add(receita);
         return lista;
@@ -46,8 +54,12 @@ public class ListaService {
 
     @Transactional
     public Lista removerReceita(Long id_receita, Long id_lista) {
-        Receita receita = receitaRepository.findById(id_receita).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id_receita + "."));
+
         Lista lista = listaRepository.findById(id_lista).orElseThrow(() -> new EntidadeNaoEncontradaException("Lista não encontrada de id " + id_lista + "."));
+
+        validadorUsuario.validarAutenticacao(lista.getUsuario().getId());
+
+        Receita receita = receitaRepository.findById(id_receita).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id_receita + "."));
 
         lista.getReceitas().remove(receita);
         return lista;
@@ -56,6 +68,9 @@ public class ListaService {
     @Transactional
     public Lista alterar(AlteracaoListaDTO dados, Long id) {
         Lista lista = listaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Lista não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(lista.getUsuario().getId());
+
         if(dados.descricao() != null && !dados.descricao().isBlank()) {
             lista.setDescricao(dados.descricao());
         }

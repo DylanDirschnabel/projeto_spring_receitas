@@ -10,6 +10,7 @@ import dylan.senior.projeto.repositories.AvaliacaoRepository;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
 import dylan.senior.projeto.validacoes.ValidadorAvaliacao;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -30,6 +31,9 @@ public class AvaliacaoService {
     @Autowired
     private ValidadorAvaliacao validadorAvaliacao;
 
+    @Autowired
+    private ValidadorUsuario validadorUsuario;
+
     @Transactional
     public Avaliacao criarAvaliacao(CadastroAvaliacaoDTO dados) {
 
@@ -47,6 +51,8 @@ public class AvaliacaoService {
     public Avaliacao alterar(Long id, AlteracaoAvaliacaoDTO dados) {
 
         var avaliacao = avaliacaoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Avaliação não encontrada com id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(avaliacao.getUsuario().getId());
 
         if(dados.nota() != null) {
             validadorAvaliacao.validarNota(dados.nota());

@@ -8,6 +8,7 @@ import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaExce
 import dylan.senior.projeto.infra.exceptions.exception.ValidacaoException;
 import dylan.senior.projeto.repositories.AvaliacaoRepository;
 import dylan.senior.projeto.services.AvaliacaoService;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -29,6 +30,9 @@ public class AvaliacaoController {
 
     @Autowired
     private AvaliacaoRepository avaliacaoRepository;
+
+    @Autowired
+    private ValidadorUsuario validadorUsuario;
 
     @PostMapping
     @Transactional
@@ -68,6 +72,9 @@ public class AvaliacaoController {
     @Transactional
     public ResponseEntity<String> deletar(@PathVariable Long id) {
         var avaliacao = avaliacaoRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Avaliação não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(avaliacao.getUsuario().getId());
+
         avaliacaoRepository.delete(avaliacao);
         return ResponseEntity.ok("Avaliação deletada com sucesso!");
     }

@@ -1,7 +1,6 @@
 package dylan.senior.projeto.controllers;
 
 import dylan.senior.projeto.dtos.alteracao.AlteracaoUsuarioDTO;
-import dylan.senior.projeto.dtos.cadastro.CadastroUsuarioDTO;
 import dylan.senior.projeto.dtos.detalhamento.DetalhamentoUsuarioDTO;
 import dylan.senior.projeto.dtos.listagem.ListagemUsuarioDTO;
 import dylan.senior.projeto.entities.Usuario;
@@ -21,13 +20,11 @@ import org.springframework.data.domain.PageImpl;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.util.UriComponentsBuilder;
 
 import java.util.List;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
-import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -53,42 +50,7 @@ class UsuarioControllerTest {
         usuario = new Usuario();
     }
 
-    // ---- Testes 'cadastrar' ---- //
 
-    @Test
-    @DisplayName("Teste 'cadastrar'")
-    public void teste1() {
-
-        CadastroUsuarioDTO dados = new CadastroUsuarioDTO("ana@gmail", "superSenha123!", "Ana Teste");
-
-        when(usuarioRepository.save(any(Usuario.class))).thenReturn(usuario);
-
-        UriComponentsBuilder uriBuilder = UriComponentsBuilder.fromUriString("http://localhost");
-
-
-        ResponseEntity<DetalhamentoUsuarioDTO> response = usuarioController.cadastrar(dados, uriBuilder);
-
-        assertAll("testes",
-                () -> assertEquals("201 CREATED", response.getStatusCode().toString()),
-                () -> {
-                    assertNotNull(response.getBody());
-                    assertEquals("Ana Teste", response.getBody().nome());
-                },
-                () -> {
-                    assertNotNull(response.getBody());
-                    assertEquals("superSenha123!", response.getBody().senha());
-                },
-                () -> {
-                    assertNotNull(response.getBody());
-                    assertEquals("ana@gmail", response.getBody().login());
-                }
-        );
-
-
-        verify(validadorUsuario).validar(dados);
-        verify(usuarioRepository).save(any(Usuario.class));
-
-    }
 
     // ---- Testes 'listar' ---- //
 

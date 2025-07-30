@@ -8,6 +8,7 @@ import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaExce
 import dylan.senior.projeto.repositories.ListaRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
 import dylan.senior.projeto.services.ListaService;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -33,6 +34,9 @@ public class ListaController {
 
     @Autowired
     private UsuarioRepository usuarioRepository;
+
+    @Autowired
+    private ValidadorUsuario validadorUsuario;
 
     @PostMapping
     @Transactional
@@ -84,6 +88,9 @@ public class ListaController {
     @Transactional
     public ResponseEntity<String> deletar(@PathVariable Long id) {
         var lista = listaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Lista não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(lista.getUsuario().getId());
+
         listaRepository.delete(lista);
         return ResponseEntity.ok("Lista deletada com sucesso!");
     }

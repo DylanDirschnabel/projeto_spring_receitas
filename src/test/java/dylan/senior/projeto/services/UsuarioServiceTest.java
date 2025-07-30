@@ -12,6 +12,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.security.crypto.password.PasswordEncoder;
 
 import java.util.Optional;
 
@@ -30,6 +31,9 @@ class UsuarioServiceTest {
     @Mock
     private ValidadorUsuario validadorUsuario;
 
+    @Mock
+    private PasswordEncoder passwordEncoder;
+
     private Usuario usuario;
 
     @BeforeEach
@@ -45,13 +49,14 @@ class UsuarioServiceTest {
         AlteracaoUsuarioDTO dados = new AlteracaoUsuarioDTO("alterado", "com", "sucesso");
 
         when(usuarioRepository.findById(4L)).thenReturn(Optional.of(usuario));
+        when(passwordEncoder.encode("sucesso")).thenReturn("sucesso!");
 
         Usuario resultado = usuarioService.alterar(dados, 4L);
 
         assertAll("testes",
                 () -> assertEquals("alterado", resultado.getLogin()),
                 () -> assertEquals("com", usuario.getNome()),
-                () -> assertEquals("sucesso", usuario.getSenha()),
+                () -> assertEquals("sucesso!", usuario.getSenha()),
                 () -> assertEquals(resultado, usuario)
                 );
     }

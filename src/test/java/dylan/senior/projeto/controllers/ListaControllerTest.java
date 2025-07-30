@@ -9,6 +9,7 @@ import dylan.senior.projeto.entities.Usuario;
 import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaException;
 import dylan.senior.projeto.repositories.ListaRepository;
 import dylan.senior.projeto.services.ListaService;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +44,9 @@ class ListaControllerTest {
 
     @Mock
     private ListaRepository listaRepository;
+
+    @Mock
+    private ValidadorUsuario validadorUsuario;
 
     private Lista lista;
 

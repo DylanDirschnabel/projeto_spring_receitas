@@ -10,6 +10,7 @@ import dylan.senior.projeto.repositories.AvaliacaoRepository;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
 import dylan.senior.projeto.validacoes.ValidadorAvaliacao;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -42,6 +43,9 @@ class AvaliacaoServiceTest {
     @Mock
     private AvaliacaoRepository avaliacaoRepository;
 
+    @Mock
+    private ValidadorUsuario validadorUsuario;
+
     private Receita receita;
 
     private Usuario usuario;
@@ -53,6 +57,8 @@ class AvaliacaoServiceTest {
         receita = new Receita();
         usuario = new Usuario();
         avaliacao = new Avaliacao();
+        avaliacao.setUsuario(usuario);
+        usuario.setId(1L);
     }
 
     // ---- Testes 'criarAvaliacao' ---- //

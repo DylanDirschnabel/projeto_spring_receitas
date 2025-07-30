@@ -7,6 +7,7 @@ import dylan.senior.projeto.repositories.UsuarioRepository;
 import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -18,8 +19,14 @@ public class UsuarioService {
     @Autowired
     private ValidadorUsuario validadorUsuario;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Transactional
     public Usuario alterar(AlteracaoUsuarioDTO dados, Long id) {
+
+        validadorUsuario.validarAutenticacao(id);
+
         var usuario = usuarioRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Usuário não encontrado de id " + id + "."));
 
         if(dados.nome() != null && !dados.nome().isBlank()) {
@@ -31,7 +38,7 @@ public class UsuarioService {
         }
         if(dados.senha() != null && !dados.senha().isBlank()) {
             validadorUsuario.validarSenha(dados.senha());
-            usuario.setSenha(dados.senha());
+            usuario.setSenha(passwordEncoder.encode(dados.senha()));
         }
 
         return usuario;

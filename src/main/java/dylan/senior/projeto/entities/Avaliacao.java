@@ -23,6 +23,7 @@ public class Avaliacao {
     @Setter
     private String comentario;
 
+    @Setter
     @ManyToOne
     @JoinColumn(name = "id_usuario", referencedColumnName = "id")
     private Usuario usuario;

@@ -1,9 +1,11 @@
 package dylan.senior.projeto.validacoes;
 
 import dylan.senior.projeto.dtos.cadastro.CadastroUsuarioDTO;
+import dylan.senior.projeto.entities.Usuario;
 import dylan.senior.projeto.infra.exceptions.exception.ValidacaoException;
 import dylan.senior.projeto.repositories.UsuarioRepository;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Component;
 
 @Component
@@ -49,6 +51,13 @@ public class ValidadorUsuario {
             throw new ValidacaoException("Erro: senha deve conter pelo menos algum desses caracteres: [!, @, #, $, %, &, ?]");
         }
 
+    }
+
+    public void validarAutenticacao(Long id) {
+        Usuario autenticado = (Usuario) SecurityContextHolder.getContext().getAuthentication().getPrincipal();
+        if(!autenticado.getId().equals(id)) {
+            throw new ValidacaoException("Erro: usuário inválido");
+        }
     }
 
 }

@@ -88,45 +88,6 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
             """)
     List<String> findTagsById(Long id);
 
-//    @Query("""
-//            SELECT new dylan.senior.projeto.dtos.busca.ListagemSemTagsDTO(
-//            r.id,
-//            r.nome,
-//            ROUND(COALESCE(AVG(a.nota), 0), 2),
-//            r.dtCriacao,
-//            r.criador.nome
-//            )
-//            FROM Receita r
-//            JOIN r.tags t
-//            WHERE t.nome IN
-//            (
-//            SELECT t2.nome
-//            FROM Lista l
-//            JOIN l.receitas r2
-//            JOIN r2.tags t2
-//            WHERE l.usuario.id = :id_usuario
-//            GROUP BY r2.id, t2.nome
-//            ORDER BY COUNT(t2.nome) DESC
-//            LIMIT 5
-//            )
-//            AND r.id NOT IN
-//            (
-//            SELECT r3.id
-//            FROM Lista l2
-//            JOIN l2.receitas r3
-//            WHERE l.usuario.id = :id_usuario
-//            )
-//            AND r.id NOT IN
-//            (
-//            SELECT r4.id
-//            FROM Avaliacao a
-//            JOIN a.receita r4
-//            WHERE a.usuario = :id_usuario
-//            )
-//            LIMIT 3
-//            """)
-//    List<ListagemSemTagsDTO> Recomendar(Long id_usuario);
-
 
     @Query(value = """
 

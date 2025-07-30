@@ -10,6 +10,7 @@ import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaExce
 import dylan.senior.projeto.repositories.ListaRepository;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.repositories.UsuarioRepository;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -41,6 +42,9 @@ class ListaServiceTest {
     @Mock
     private ListaRepository listaRepository;
 
+    @Mock
+    private ValidadorUsuario validadorUsuario;
+
     private Usuario usuario;
     private Receita receita;
     private Lista lista;
@@ -48,7 +52,9 @@ class ListaServiceTest {
     @BeforeEach
     public void setUp() {
         usuario = new Usuario();
+        usuario.setId(1L);
         lista = new Lista();
+        lista.setUsuario(usuario);
         receita = new Receita();
     }
 
@@ -97,7 +103,7 @@ class ListaServiceTest {
     @Test
     @DisplayName("Teste 'adicionarReceita': receita não encontrada")
     public void teste4() {
-
+        when(listaRepository.findById(4L)).thenReturn(Optional.of(lista));
         when(receitaRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertEquals("Receita não encontrada de id 5.", assertThrows(EntidadeNaoEncontradaException.class, () -> listaService.adicionarReceita(5L, 4L)).getMessage());
@@ -106,7 +112,6 @@ class ListaServiceTest {
     @DisplayName("Teste 'adicionarReceita': lista não encontrada")
     public void teste5() {
 
-        when(receitaRepository.findById(5L)).thenReturn(Optional.of(receita));
         when(listaRepository.findById(4L)).thenReturn(Optional.empty());
 
         assertEquals("Lista não encontrada de id 4.", assertThrows(EntidadeNaoEncontradaException.class, () -> listaService.adicionarReceita(5L, 4L)).getMessage());
@@ -129,6 +134,7 @@ class ListaServiceTest {
     @DisplayName("Teste 'removerReceita': receita não encontrada")
     public void teste7() {
 
+        when(listaRepository.findById(4L)).thenReturn(Optional.of(lista));
         when(receitaRepository.findById(5L)).thenReturn(Optional.empty());
 
         assertEquals("Receita não encontrada de id 5.", assertThrows(EntidadeNaoEncontradaException.class, () -> listaService.removerReceita(5L, 4L)).getMessage());
@@ -137,7 +143,6 @@ class ListaServiceTest {
     @DisplayName("Teste 'removerReceita': lista não encontrada")
     public void teste8() {
 
-        when(receitaRepository.findById(5L)).thenReturn(Optional.of(receita));
         when(listaRepository.findById(4L)).thenReturn(Optional.empty());
 
         assertEquals("Lista não encontrada de id 4.", assertThrows(EntidadeNaoEncontradaException.class, () -> listaService.removerReceita(5L, 4L)).getMessage());

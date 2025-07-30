@@ -10,6 +10,7 @@ import java.util.Set;
 @Table(name = "usuarios")
 @Entity(name = "Usuario")
 @Getter
+@Setter
 @NoArgsConstructor
 @AllArgsConstructor
 @EqualsAndHashCode(of = "id")

@@ -10,11 +10,11 @@ import dylan.senior.projeto.dtos.detalhamento.DetalhamentoReceitaDTO;
 import dylan.senior.projeto.dtos.busca.ListagemBuscaReceitaDTO;
 import dylan.senior.projeto.dtos.listagem.ListagemReceitaDTO;
 
-import dylan.senior.projeto.entities.Receita;
+
 import dylan.senior.projeto.infra.exceptions.exception.EntidadeNaoEncontradaException;
 import dylan.senior.projeto.repositories.ReceitaRepository;
 import dylan.senior.projeto.services.ReceitaService;
-import jakarta.persistence.EntityNotFoundException;
+import dylan.senior.projeto.validacoes.ValidadorUsuario;
 import jakarta.transaction.Transactional;
 import jakarta.validation.Valid;
 import jakarta.validation.constraints.NotNull;
@@ -37,6 +37,9 @@ public class ReceitaController {
 
     @Autowired
     private ReceitaService receitaService;
+
+    @Autowired
+    private ValidadorUsuario validadorUsuario;
 
     @PostMapping
     @Transactional
@@ -74,6 +77,9 @@ public class ReceitaController {
     @Transactional
     public ResponseEntity<ListagemReceitaDTO> adicionarTag(@RequestBody String tag, @PathVariable Long id) {
         var receita = receitaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(receita.getCriador().getId());
+
         receitaService.adicionarTag(receita, tag);
 
         return ResponseEntity.ok(new ListagemReceitaDTO(receita));
@@ -83,6 +89,9 @@ public class ReceitaController {
     @Transactional
     public ResponseEntity<ListagemReceitaDTO> removerTag(@RequestBody String tag, @PathVariable Long id) {
         var receita = receitaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(receita.getCriador().getId());
+
         receitaService.removerTag(receita, tag);
 
         return ResponseEntity.ok(new ListagemReceitaDTO(receita));
@@ -91,7 +100,10 @@ public class ReceitaController {
     @PostMapping("/ingrediente/{id}")
     @Transactional
     public ResponseEntity<ListagemReceitaDTO> adicionarIngrediente(@RequestBody String ingrediente, @PathVariable Long id) {
-        var receita = receitaRepository.findById(id).orElseThrow();
+        var receita = receitaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(receita.getCriador().getId());
+
         receitaService.adicionarIngrediente(receita, ingrediente);
 
         return ResponseEntity.ok(new ListagemReceitaDTO(receita));
@@ -100,7 +112,10 @@ public class ReceitaController {
     @DeleteMapping("/ingrediente/{id}")
     @Transactional
     public ResponseEntity<ListagemReceitaDTO> removerIngrediente(@RequestBody String ingrediente, @PathVariable Long id) {
-        var receita = receitaRepository.findById(id).orElseThrow();
+        var receita = receitaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(receita.getCriador().getId());
+
         receitaService.removerIngrediente(receita, ingrediente);
 
         return ResponseEntity.ok(new ListagemReceitaDTO(receita));
@@ -110,6 +125,9 @@ public class ReceitaController {
     @Transactional
     public ResponseEntity<String> deletar(@PathVariable Long id) {
         var receita = receitaRepository.findById(id).orElseThrow(() -> new EntidadeNaoEncontradaException("Receita não encontrada de id " + id + "."));
+
+        validadorUsuario.validarAutenticacao(receita.getCriador().getId());
+
         receitaRepository.delete(receita);
         return ResponseEntity.ok("Receita deletada com sucesso!");
     }
