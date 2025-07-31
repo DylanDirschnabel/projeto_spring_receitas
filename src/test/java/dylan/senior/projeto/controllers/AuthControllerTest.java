@@ -7,6 +7,7 @@ import dylan.senior.projeto.entities.Usuario;
 import dylan.senior.projeto.infra.security.TokenService;
 import dylan.senior.projeto.repositories.UsuarioRepository;
 import dylan.senior.projeto.validacoes.ValidadorUsuario;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -16,6 +17,7 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 
+import java.util.HashSet;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -40,6 +42,13 @@ class AuthControllerTest {
     @Mock
     private ValidadorUsuario validadorUsuario;
 
+    private Usuario usuario;
+
+    @BeforeEach
+    public void setUp() {
+        usuario = new Usuario(1L, "usuario", "Usuário Teste", "senhaCodificada", new HashSet<>(), new HashSet<>(), new HashSet<>());
+    }
+
     // ---- Testes 'login' ---- //
 
     @Test
@@ -47,10 +56,7 @@ class AuthControllerTest {
     public void teste1() {
 
         LoginDTO loginDTO = new LoginDTO("usuario", "senha123");
-        Usuario usuario = new Usuario();
-        usuario.setLogin("usuario");
-        usuario.setSenha("senhaCodificada");
-        usuario.setNome("Usuário Teste");
+
 
         when(usuarioRepository.findByLogin("usuario")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("senha123", "senhaCodificada")).thenReturn(true);
@@ -69,9 +75,6 @@ class AuthControllerTest {
     @DisplayName("Teste 'login': dados inválidos")
     public void teste2() {
         LoginDTO loginDTO = new LoginDTO("usuario", "senhaErrada");
-        Usuario usuario = new Usuario();
-        usuario.setLogin("usuario");
-        usuario.setSenha("senhaCodificada");
 
         when(usuarioRepository.findByLogin("usuario")).thenReturn(Optional.of(usuario));
         when(passwordEncoder.matches("senhaErrada", "senhaCodificada")).thenReturn(false);
@@ -107,8 +110,6 @@ class AuthControllerTest {
     @DisplayName("Teste 'register': login existente")
     public void teste4() {
         CadastroUsuarioDTO cadastroDTO = new CadastroUsuarioDTO("usuarioExistente", "senha123", "Usuário Existente");
-        Usuario usuario = new Usuario();
-        usuario.setLogin("usuarioExistente");
 
         when(usuarioRepository.findByLogin("usuarioExistente")).thenReturn(Optional.of(usuario));
 

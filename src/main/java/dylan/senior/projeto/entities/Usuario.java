@@ -36,10 +36,4 @@ public class Usuario {
     @OneToMany(mappedBy = "usuario")
     private Set<Lista> listas = new HashSet<>();
 
-    public Usuario(CadastroUsuarioDTO dados) {
-        this.login = dados.login();
-        this.nome = dados.nome();
-        this.senha = dados.senha();
-    }
-
 }
