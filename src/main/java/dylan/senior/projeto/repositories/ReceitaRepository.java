@@ -49,12 +49,13 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
             WHERE LOWER(t.nome) IN :inclusas
             AND r.id NOT IN
             (SELECT r2.id FROM Receita r2 JOIN r2.tags t2 WHERE LOWER(t2.nome) IN :exclusas)
+            AND LOWER(r.nome) LIKE CONCAT('%', :nome, '%')
             GROUP BY r.id, r.criador.nome
             HAVING COUNT(DISTINCT LOWER(t.nome)) = :qtInclusas
             ORDER BY COALESCE(AVG(a.nota), 0) DESC
             
             """)
-    List<ListagemSemTagsDTO> buscaExclusivaTags(List<String> inclusas, List<String> exclusas, int qtInclusas);
+    List<ListagemSemTagsDTO> buscaExclusivaTags(@Param("nome") String nome, List<String> inclusas, List<String> exclusas, int qtInclusas);
 
     @Query(value = """
             
@@ -68,6 +69,7 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
             FROM Receita r
             JOIN r.tags t
             LEFT JOIN r.avaliacoes a
+            WHERE LOWER(r.nome) LIKE CONCAT('%', :nome, '%')
             GROUP BY r.id, r.criador.nome
             ORDER BY
                 SUM(CASE
@@ -78,7 +80,7 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
                 COALESCE(AVG(a.nota), 0) DESC
             
             """)
-    List<ListagemSemTagsDTO> buscaInclusivaTags(List<String> inclusas, List<String> exclusas);
+    List<ListagemSemTagsDTO> buscaInclusivaTags(@Param("nome") String nome, List<String> inclusas, List<String> exclusas);
 
     @Query("""
             SELECT t.nome
@@ -120,8 +122,9 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
             FROM avaliacoes a2
             WHERE a2.id_usuario = :idUsuario
         )
+        AND r.id_criador != :idUsuario
         GROUP BY r.id, r.nome, r.dt_criacao, u.nome
-        ORDER BY nota DESC
+        ORDER BY COUNT(DISTINCT t.id) DESC, nota DESC
         LIMIT 3
 
 """, nativeQuery = true)

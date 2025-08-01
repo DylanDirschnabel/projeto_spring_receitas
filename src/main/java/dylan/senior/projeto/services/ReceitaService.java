@@ -28,6 +28,8 @@ import org.springframework.ai.openai.api.ResponseFormat;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -172,8 +174,13 @@ public class ReceitaService {
         if(dados == null) {
             return new ArrayList<>();
         }
+        String nome = "";
+        if(dados.nome() != null) {
+            nome = dados.nome().toLowerCase();
+        }
 
         return receitaRepository.buscaInclusivaTags(
+                nome,
                 dados.inclusas().stream().map(String::toLowerCase).toList(),
                 dados.exclusas().stream().map(String::toLowerCase).toList())
                 .stream().map(x -> new ListagemBuscaReceitaDTO(x, receitaRepository.findTagsById(x.id()))).toList();
@@ -184,10 +191,16 @@ public class ReceitaService {
         if(dados == null) {
             return new ArrayList<>();
         }
+        String nome = "";
+        if(dados.nome() != null) {
+            nome = dados.nome().toLowerCase();
+        }
 
-        return receitaRepository.buscaExclusivaTags(dados.inclusas().stream().map(String::toLowerCase).toList(),
-                                                    dados.exclusas().stream().map(String::toLowerCase).toList(),
-                                                    dados.inclusas().size())
+        return receitaRepository.buscaExclusivaTags(
+                nome,
+                dados.inclusas().stream().map(String::toLowerCase).toList(),
+                dados.exclusas().stream().map(String::toLowerCase).toList(),
+                dados.inclusas().size())
                 .stream().map(x ->  new ListagemBuscaReceitaDTO(x, receitaRepository.findTagsById(x.id()))).toList();
     }
 
@@ -217,8 +230,8 @@ public class ReceitaService {
         List<ListagemSemTagsDTO> listagem = resultado.stream().map(r -> new ListagemSemTagsDTO(
                 (Long) r[0],
                 (String) r[1],
-                (Double) r[2],
-                (LocalDateTime) r[3],
+                ((BigDecimal) r[2]).doubleValue(),
+                ((Date) r[3]).toLocalDate().atStartOfDay(),
                 (String) r[4]
                 )
         ).toList();

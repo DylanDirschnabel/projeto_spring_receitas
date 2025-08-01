@@ -356,7 +356,7 @@ class ReceitaControllerTest {
     @DisplayName("Teste 'buscaExclusiva'")
     public void teste13() {
 
-        BuscaReceitaDTO dados = new BuscaReceitaDTO(new ArrayList<>(), new ArrayList<>());
+        BuscaReceitaDTO dados = new BuscaReceitaDTO(null, new ArrayList<>(), new ArrayList<>());
         when(receitaService.buscaExclusiva(dados)).thenReturn(List.of(new ListagemBuscaReceitaDTO(1L, "nome", new ArrayList<>(), 5d, LocalDateTime.now(), "criador")));
 
         ResponseEntity<List<ListagemBuscaReceitaDTO>> response = receitaController.buscaExclusiva(dados);
@@ -387,7 +387,7 @@ class ReceitaControllerTest {
     @DisplayName("Teste 'buscaExclusiva'")
     public void teste14() {
 
-        BuscaReceitaDTO dados = new BuscaReceitaDTO(new ArrayList<>(), new ArrayList<>());
+        BuscaReceitaDTO dados = new BuscaReceitaDTO(null, new ArrayList<>(), new ArrayList<>());
         when(receitaService.buscaInclusiva(dados)).thenReturn(List.of(new ListagemBuscaReceitaDTO(1L, "nome", new ArrayList<>(), 5d, LocalDateTime.now(), "criador")));
 
         ResponseEntity<List<ListagemBuscaReceitaDTO>> response = receitaController.buscaInclusiva(dados);

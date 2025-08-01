@@ -1,0 +1,6 @@
+
+ALTER TABLE listas
+ALTER COLUMN id_usuario TYPE BIGINT;
+
+ALTER TABLE avaliacoes
+ALTER COLUMN id_usuario TYPE BIGINT;

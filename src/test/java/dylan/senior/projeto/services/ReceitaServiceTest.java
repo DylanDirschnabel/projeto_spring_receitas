@@ -29,6 +29,8 @@ import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.ai.chat.prompt.Prompt;
 import org.springframework.ai.openai.OpenAiChatModel;
 
+import java.math.BigDecimal;
+import java.sql.Date;
 import java.time.LocalDateTime;
 import java.util.ArrayList;
 import java.util.List;
@@ -359,7 +361,7 @@ class ReceitaServiceTest {
 
 
     @Test
-    @DisplayName("Teste 'buscaInclusiva': dados válidos")
+    @DisplayName("Teste 'buscaInclusiva': dados válidos e nome não nulo")
     void teste26() {
         // Arrange
         List<String> inclusas = List.of("doce", "rápido");
@@ -367,9 +369,37 @@ class ReceitaServiceTest {
 
         List<String> tags = List.of("doce", "rápido");
 
-        BuscaReceitaDTO dados = new BuscaReceitaDTO(inclusas, exclusas);
+        BuscaReceitaDTO dados = new BuscaReceitaDTO("teste", inclusas, exclusas);
 
         when(receitaRepository.buscaInclusivaTags(
+                "teste",
+                inclusas.stream().map(String::toLowerCase).toList(),
+                exclusas.stream().map(String::toLowerCase).toList()))
+                .thenReturn(List.of(new ListagemSemTagsDTO(1L, "Bolo de chocolate", 5d, LocalDateTime.now(), "Maria")));
+
+        when(receitaRepository.findTagsById(1L)).thenReturn(tags);
+
+        // Act
+        List<ListagemBuscaReceitaDTO> resultado = receitaService.buscaInclusiva(dados);
+
+        // Assert
+        assertEquals(1, resultado.size());
+        assertEquals("Bolo de chocolate", resultado.get(0).nome());
+        assertEquals(tags, resultado.get(0).tags());
+    }
+    @Test
+    @DisplayName("Teste 'buscaInclusiva': dados válidos e nome nulo")
+    void teste26b() {
+        // Arrange
+        List<String> inclusas = List.of("doce", "rápido");
+        List<String> exclusas = List.of("glúten");
+
+        List<String> tags = List.of("doce", "rápido");
+
+        BuscaReceitaDTO dados = new BuscaReceitaDTO(null, inclusas, exclusas);
+
+        when(receitaRepository.buscaInclusivaTags(
+                "",
                 inclusas.stream().map(String::toLowerCase).toList(),
                 exclusas.stream().map(String::toLowerCase).toList()))
                 .thenReturn(List.of(new ListagemSemTagsDTO(1L, "Bolo de chocolate", 5d, LocalDateTime.now(), "Maria")));
@@ -399,7 +429,7 @@ class ReceitaServiceTest {
     // ---- Testes 'buscaExclusivaTags' ---- //
 
     @Test
-    @DisplayName("Teste 'buscaExclusiva': dados válidos")
+    @DisplayName("Teste 'buscaExclusiva': dados válidos e nome nulo")
     void teste28() {
         // Arrange
         List<String> inclusas = List.of("doce", "rápido");
@@ -407,9 +437,38 @@ class ReceitaServiceTest {
 
         List<String> tags = List.of("doce", "rápido");
 
-        BuscaReceitaDTO dados = new BuscaReceitaDTO(inclusas, exclusas);
+        BuscaReceitaDTO dados = new BuscaReceitaDTO(null, inclusas, exclusas);
 
         when(receitaRepository.buscaExclusivaTags(
+                "",
+                inclusas.stream().map(String::toLowerCase).toList(),
+                exclusas.stream().map(String::toLowerCase).toList(),
+                inclusas.size()))
+                .thenReturn(List.of(new ListagemSemTagsDTO(1L, "Bolo de chocolate", 5d, LocalDateTime.now(), "Maria")));
+
+        when(receitaRepository.findTagsById(1L)).thenReturn(tags);
+
+        // Act
+        List<ListagemBuscaReceitaDTO> resultado = receitaService.buscaExclusiva(dados);
+
+        // Assert
+        assertEquals(1, resultado.size());
+        assertEquals("Bolo de chocolate", resultado.get(0).nome());
+        assertEquals(tags, resultado.get(0).tags());
+    }
+    @Test
+    @DisplayName("Teste 'buscaExclusiva': dados válidos e nome não nulo")
+    void teste28b() {
+        // Arrange
+        List<String> inclusas = List.of("doce", "rápido");
+        List<String> exclusas = List.of("glúten");
+
+        List<String> tags = List.of("doce", "rápido");
+
+        BuscaReceitaDTO dados = new BuscaReceitaDTO("teste", inclusas, exclusas);
+
+        when(receitaRepository.buscaExclusivaTags(
+                "teste",
                 inclusas.stream().map(String::toLowerCase).toList(),
                 exclusas.stream().map(String::toLowerCase).toList(),
                 inclusas.size()))
@@ -555,7 +614,7 @@ class ReceitaServiceTest {
     @DisplayName("Teste 'buscaPorRecomendacao': usuário válido")
     public void test34() {
 
-        Object[] resultado = {1L, "nome", 4D, LocalDateTime.now(), "criador"};
+        Object[] resultado = {1L, "nome", new BigDecimal("4"), new Date(5L), "criador"};
         List<Object[]> listaResultado = new ArrayList<>();
         listaResultado.add(resultado);
 
