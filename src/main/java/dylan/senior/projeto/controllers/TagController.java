@@ -54,7 +54,7 @@ public class TagController {
         return ResponseEntity.ok(new ListagemTagDTO(tag));
     }
 
-    @GetMapping("/buscaPorNome")
+    @PostMapping("/buscaPorNome")
     @Transactional
     public ResponseEntity<ListagemTagDTO> detalharPorNome(@RequestBody @Valid CadastroTagDTO dados) {
         var tag = tagRepository.findByNome(dados.nome()).orElseThrow(() -> new EntidadeNaoEncontradaException("Tag não encontrada de nome '" + dados.nome() + "'."));

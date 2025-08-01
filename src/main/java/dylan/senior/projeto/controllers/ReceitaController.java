@@ -134,25 +134,25 @@ public class ReceitaController {
 
     // -------- Consultas Avançadas
 
-    @GetMapping("/busca")
+    @PostMapping("/busca")
     @Transactional
     public ResponseEntity<List<ListagemBuscaReceitaDTO>> buscaPorNome(@RequestBody @Valid BuscaPorNomeDTO dados) {
         return ResponseEntity.ok(receitaService.buscaPorNome(dados.nome()));
     }
 
-    @GetMapping("/busca/exclusiva")
+    @PostMapping("/busca/exclusiva")
     @Transactional
     public ResponseEntity<List<ListagemBuscaReceitaDTO>> buscaExclusiva(@RequestBody @Valid BuscaReceitaDTO dados) {
         return ResponseEntity.ok(receitaService.buscaExclusiva(dados));
     }
 
-    @GetMapping("/busca/inclusiva")
+    @PostMapping("/busca/inclusiva")
     @Transactional
     public ResponseEntity<List<ListagemBuscaReceitaDTO>> buscaInclusiva(@RequestBody @Valid BuscaReceitaDTO dados) {
         return ResponseEntity.ok(receitaService.buscaInclusiva(dados));
     }
 
-    @GetMapping("/recomendacao/{id}")
+    @PostMapping("/recomendacao/{id}")
     @Transactional
     public ResponseEntity<List<ListagemBuscaReceitaDTO>> buscaRecomendada(@PathVariable @NotNull Long id) {
         return ResponseEntity.ok(receitaService.buscaPorRecomendacao(id));

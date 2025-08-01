@@ -95,7 +95,7 @@ public class ListaController {
         return ResponseEntity.ok("Lista deletada com sucesso!");
     }
 
-    @GetMapping("/usuario/{id}")
+    @PostMapping("/usuario/{id}")
     @Transactional
     public ResponseEntity<List<ListagemListaDTO>> listarPorUsuario(@PathVariable @NotNull Long id) {
         return ResponseEntity.ok(listaService.listarPorUsuario(id));
