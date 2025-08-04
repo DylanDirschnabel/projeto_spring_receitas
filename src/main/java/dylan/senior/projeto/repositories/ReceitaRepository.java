@@ -36,23 +36,30 @@ public interface ReceitaRepository extends JpaRepository<Receita, Long> {
 
     @Query("""
             
+            
             SELECT new dylan.senior.projeto.dtos.busca.ListagemSemTagsDTO(
-            r.id,
-            r.nome,
-            ROUND(COALESCE(AVG(a.nota), 0), 2),
-            r.dtCriacao,
-            r.criador.nome
+                r.id,
+                r.nome,
+                ROUND(COALESCE(AVG(a.nota), 0), 2),
+                r.dtCriacao,
+                r.criador.nome
             )
             FROM Receita r
-            JOIN r.tags t
+            LEFT JOIN r.tags t
             LEFT JOIN r.avaliacoes a
-            WHERE LOWER(t.nome) IN :inclusas
-            AND r.id NOT IN
-            (SELECT r2.id FROM Receita r2 JOIN r2.tags t2 WHERE LOWER(t2.nome) IN :exclusas)
+            WHERE (
+                :qtInclusas = 0 OR LOWER(t.nome) IN :inclusas
+            )
+            AND r.id NOT IN (
+                SELECT r2.id FROM Receita r2 JOIN r2.tags t2 WHERE LOWER(t2.nome) IN :exclusas
+            )
             AND LOWER(r.nome) LIKE CONCAT('%', :nome, '%')
             GROUP BY r.id, r.criador.nome
-            HAVING COUNT(DISTINCT LOWER(t.nome)) = :qtInclusas
+            HAVING (
+                :qtInclusas = 0 OR COUNT(DISTINCT LOWER(t.nome)) = :qtInclusas
+            )
             ORDER BY COALESCE(AVG(a.nota), 0) DESC
+            
             
             """)
     List<ListagemSemTagsDTO> buscaExclusivaTags(@Param("nome") String nome, List<String> inclusas, List<String> exclusas, int qtInclusas);
